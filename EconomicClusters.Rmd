@@ -1,0 +1,176 @@
+---
+title: "552EconomicClusters"
+author: "Carlton Hencey"
+date: "December 7, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The goal of this project is to analyze different economic groupings of countries and the how different factors are associated with these groupings. The first part of this process was to enter the data, clean it by choosing only the important variables, and then scale the variables. The code and results are given below. 
+```{r Data Entry and Cleaning}
+library(fpc)
+library(cluster)
+Data<-read.csv("economic2018data.csv")
+EconomicData<-Data[,c(2,5,7:24,26:34)]
+colnames(EconomicData)<-c("Name","Rank","Score","Property","Judicial","Gov","Tax","GovSpending",
+                          "FiscalHealth","BusinessFreedom","LaborFreedom","MonetaryFreedom","TradeFreedom",
+                          "InvestmentFreedom","FinancialFreedom","Tariff","IncomeTax","CorporateTax",
+                          "TaxBurdernOfGDP","GovExpendOfGDP","Population","GDP","GDPGrowth","5YearGrowth",
+                          "GDPperCapita","Unemployment","Inflation","FDIinflow","PublicDebt")
+for (i in 2:29){
+  EconomicData[,i]<-as.numeric(as.character(EconomicData[,i]))
+}
+
+EconomicData<-EconomicData[complete.cases(EconomicData),]
+EconomicData[,c(2:29)]<-scale(EconomicData[,c(2:29)])
+head(EconomicData)
+```
+
+
+## In order to determine how different factors are affecting economic indicators, they will each be included in clustering with Score, GDP, GDPGrowth, and Unemployment. The factors in question are Business Freedom, Labor Freedom, Monetary Freedom, Trade Freedom, Investment Freedom, and Financial Freedom. The code and results of each one of these clusters are provided below. 
+
+##First, Business Freedom was clustered with Score, GDP, GDPGrowth, and Unemployment. By using the ward.D2 method, two clearly defined clusters were found. Next, the cluster centers for these two clusters. As shown below, one cluster has a much higher Business Freedom value, as well as a high economic Score, high GDP, and low Unemployment. However, the cluster with high Business Freedom had a low value for GDP Growth. This is interesting because more Business Freedom would be exected to increase growth within a country. 
+```{r Business Freedom Clustering}
+set.seed(1)
+
+BusinessFreedomClusterData<-EconomicData[c(10,3,22,23,26)]
+
+d <- dist(BusinessFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(BusinessFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+
+##The next factor compared with Score, GDP, GDPGrowth, and Unemployment is Labor Freedom. This clustering was also done using the ward.D2 method, which created two clusters. Of the two clusters, one had a much higher Labor Freedom value, and that cluster is also associated with a higher economic Score, higher GDP, and lower Unemployment. However, this cluster was also associated with a lower GDP Growth, which is the same as Business Freedom. 
+```{r Labor Freedom Clustering}
+set.seed(1)
+
+LaborFreedomClusterData<-EconomicData[c(11,3,22,23,26)]
+
+d <- dist(LaborFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(LaborFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+##Next, Monetary Freedom was clustered with Score, GDP, GDPGrowth, and Unemployment. For this factor, the ward.D method produced the two most clearly defined clusters. However, the cluster with the higher Monetary Freedom value also has a low GDP, low GDP growth, and high Unemployment. This would appear to indicate that Monetary Freedom is not associated with economic health of a country.
+```{r Monetary Freedom Clustering}
+set.seed(1)
+
+MonetaryFreedomClusterData<-EconomicData[c(12,3,22,23,26)]
+
+d <- dist(MonetaryFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(MonetaryFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+
+##The next factor included in clustering is Trade Freedom. Ward.D2 method was used for this clustering as well, and resulted in two clusters, with one having a much higher value of Trade Freedom. Although the cluster with Trade Freedom has a higher Score, GDP, and GDP Growth, it also has a higher Unemployment value, which indicates that increasing trade decreases the number of jobs needed at home. 
+```{r Trade Freedom Clustering}
+set.seed(1)
+
+TradeFreedomClusterData<-EconomicData[c(13,3,22,23,26)]
+
+d <- dist(TradeFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(TradeFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+
+
+##The next factor included in clustering is Investment Freedom. the method used for this clustering was ward.D2, and that method resulted in two clusters. The cluster with a higher value of Investment Freedom also had a high Score, high GDP, low GDP Growth, and high Unemployment. Therefore, Investment Freedom does not have the best association to economic prosperity of all the factors used for clustering. 
+```{r Investment Freedom Clustering}
+set.seed(1)
+
+InvestmentFreedomClusterData<-EconomicData[c(14,3,22,23,26)]
+
+d <- dist(InvestmentFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(InvestmentFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+
+##The last factor analyzed by itself was Financial Freedom. By using ward.D2, two clearly defined clusters were created. The cluster with a high Financial Freedom score also had a high Score, high GDP, and low unemployment. However, it also was associated with low GDP Growth. 
+```{r Financial Freedom Clustering}
+set.seed(1)
+
+FinancialFreedomClusterData<-EconomicData[c(15,3,22,23,26)]
+
+d <- dist(FinancialFreedomClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(FinancialFreedomClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:5)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:5)])) #cluster 2 center
+```
+
+
+##Finally, each of the six factors analyzed individually were all included together with each of the four economic indicators into new clusters. The Ward.D2 method combined these factors into two clusters. One cluster had high values of all six factors (Business Freedom, Labor Freedom, Monetary Freedom, Trade Freedom, Investment Freedom, Financial Freedom). This cluster also had a very high economic Score, a high GDP, high GDP Growth, and low unemployment. This indicates that when all of these factors have high values, the economic health of the country as a whole isexpected to be very good. 
+```{r All Factors Clustering}
+set.seed(1)
+
+AllClusterData<-EconomicData[c(10:15,3,22,23,26)]
+
+d <- dist(AllClusterData, method = "euclidean")
+fit <- hclust(d, method="ward.D2")
+groups <- cutree(fit, k=2)
+plot(fit)
+rect.hclust(fit, k=2, border="red") #two clearly defined groups
+
+Clusters<-cbind(AllClusterData,groups)
+Cluster1<-Clusters[which(Clusters$groups==1),]
+Cluster2<-Clusters[which(Clusters$groups==2),]
+(Cluster1centroid <- colMeans(Cluster1[,c(1:10)])) #cluster 1 center
+(Cluster2centroid <- colMeans(Cluster2[,c(1:10)])) #cluster 2 center
+```
+
+
+## In conclusion, all of these factors have positive associations with economic success within a company. All of these factors not only had associations with good economic indicators when grouped together, but many of them were associated with economic success individually as well. All six factors were associated with high economic Scores when clustered individually. Also, five out of the six factors were associated with a high GDP. The only unexpected result came from the GDP Growth indicator. All of the factors except for Trade Freedom were associated with low GDP Growth scores. However, the low growth may be a factor of an already successful economy without as much room to grow as a smaller economy. The least impactful factor is Monetary Freedom, which was the only factor with low GDP, low GDP Growth, and high unemployment. 
+
